@@ -6,16 +6,21 @@ package css.reader
  * @param innerBlock
  */
 class CSSBlock(
+    /** The name of the block.
+     */
     val name: String,
+    /** The type of style the block applies to.
+     */
     val type: StyleType,
     innerBlock: String,
 ) {
-    /**
+    /** The properties, in a Tree Map.
+     *  The Tree ensures that the properties are ordered alphabetically
      */
     private val properties
         : MutableMap<String, String> = toCSSProperties(innerBlock)
 
-    /**
+    /** Obtain all of the properties as an iterable.
      */
     fun getProperties()
         : Iterable<Map.Entry<String, String>> = properties.asIterable()
@@ -45,13 +50,22 @@ class CSSBlock(
     internal fun toCSSProperties(
         css: String,
     ) : MutableMap<String, String> {
-        val map = java.util.TreeMap<String, String>()
+        val map: MutableMap<String, String> = java.util.TreeMap()
         var parser = 0
         while (parser < css.length) {
             val colonIdx = css.indexOf(":", parser)
-            val scIdx = css.indexOf(";", parser)
+            var scIdx = css.indexOf(";", parser)
             if (scIdx < 0) {
-                println("Missing Semicolon")
+                // Missing semicolon
+                scIdx = css.indexOf('\n', colonIdx)
+                if (scIdx < 0) {
+                    // Skip to the end
+                    if (css.indexOf(":", colonIdx + 1) != -1) {
+                        // There are more properties after, must cancel operation
+                        throw IllegalStateException("Missing Semicolon in CSS")
+                    }
+                    scIdx = css.length
+                }
             }
             parser = if (colonIdx in 1 until scIdx) {
                 val k = css.substring(parser, colonIdx).trim()

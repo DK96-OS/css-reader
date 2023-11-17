@@ -92,4 +92,59 @@ class CSSBlockTest {
 		)
 	}
 
+	@Test
+	fun testGetProperties_InputNoFinalSemicolon_HasTwoProperties() {
+		mInstance = CSSBlock(
+			blockName,
+			StyleType.CLASS,
+			"color: red; background-color: blue"
+		)
+		val result = mInstance.getProperties()
+		assertEquals(
+			2, result.count()
+		)
+		// properties are ordered alphabetically
+		assertEquals(
+			"background-color", result.elementAt(0).key
+		)
+		assertEquals(
+			"blue", result.elementAt(0).value
+		)
+		assertEquals(
+			"color", result.elementAt(1).key
+		)
+		assertEquals(
+			"red", result.elementAt(1).value
+		)
+	}
+
+	@Test
+	fun testGetProperties_InputContainsNewLine_HasTwoProperties() {
+		mInstance = CSSBlock(
+			blockName,
+			StyleType.CLASS,
+			"""
+			color: red; 
+			background-color: blue;
+			"""
+		)
+		val result = mInstance.getProperties()
+		assertEquals(
+			2, result.count()
+		)
+		// properties are ordered alphabetically
+		assertEquals(
+			"background-color", result.elementAt(0).key
+		)
+		assertEquals(
+			"blue", result.elementAt(0).value
+		)
+		assertEquals(
+			"color", result.elementAt(1).key
+		)
+		assertEquals(
+			"red", result.elementAt(1).value
+		)
+	}
+
 }
