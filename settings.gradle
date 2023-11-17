@@ -14,4 +14,5 @@ pluginManagement {
 rootProject.name = "css-reader"
 include(
 	":reader",
+	":properties",
 )
