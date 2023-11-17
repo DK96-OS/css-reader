@@ -1,0 +1,78 @@
+plugins {
+    id "java-library"
+    id "org.jetbrains.kotlin.jvm"
+    id "jacoco"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    withJavadocJar()
+    withSourcesJar()
+}
+
+tasks.sourcesJar {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = "io.github.dk96-os.css-reader"
+            artifactId = "reader"
+            apply from: "../artifacts.gradle"
+            version = artifactVersions.arrays
+            from components.java
+        }
+    }
+}
+
+dependencies {
+    testImplementation "junit:junit:4.13.2"
+}
+
+sourceSets.main {
+    java.srcDirs("src/main/java")
+}
+
+tasks.test {
+    useJUnitPlatform() {
+        excludeTags("slow")
+    }
+    maxParallelForks = 3
+    testLogging {
+        events("passed", "failed") // not including "skipped"
+    }
+    reports {
+        junitXml {
+            outputPerTestCase = true
+            mergeReruns = true
+        }
+    }
+}
+
+tasks.jacocoTestReport {
+    dependsOn tasks.test
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir("jacocoReport")
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn tasks.test
+    violationRules {
+        failOnViolation = true
+        rule {
+            limit {
+                counter = "INSTRUCTION"
+                minimum = 0.900
+            }
+            limit {
+                counter = "BRANCH"
+                minimum = 0.900
+            }
+        }
+    }
+}
